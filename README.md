@@ -226,8 +226,8 @@ Contributions welcome! Feel free to:
 
 ## 📧 Questions?
 
-For issues or questions, please create a GitHub issue or contact the maintainer.
+For issues or questions, please create a GitHub issue and feel free to contribute.
 
 ---
 
-**Made with ❤️ by Your Name**
+
