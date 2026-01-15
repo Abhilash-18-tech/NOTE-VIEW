@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <title>Notes App</title>
+</head>
+<body>
+    <header class="top-header">
+        <div class="header-side header-left">
+            <div class="logo">
+                <span class="logo-icon">📝</span>
+                <span class="logo-text">Notes</span>
+            </div>
+        </div>
+        
+        <div class="header-center">
+            <form class="search-form" action="/" method="GET">
+                <input type="text" name="q" class="search-input" placeholder="Search notes..." value="<%= searchTerm %>">
+                <button class="search-btn" type="submit">🔍</button>
+                <% if (searchTerm) { %>
+                    <a class="clear-btn" href="/">✖</a>
+                <% } %>
+            </form>
+        </div>
+        
+        <div class="header-side header-right">
+            <a href="/about" class="header-about-btn">About</a>
+            <a href="/logout" class="header-logout-btn">Logout</a>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h1>Create Your Notes</h1>
+        <form class="note-form" action="/create" method="POST">
+            <input type="text"  name="title" class="note-title" placeholder="Title" required>
+            <textarea name="details" class="note-content" placeholder="Take a note..." rows="4"></textarea>
+            <button type="submit" class="add-btn">📌 Add Note</button>
+        </form>
+        <h2 class="notes-heading">My Notes</h2>
+        <% if (searchTerm) { %>
+            <p class="search-context">Showing results for "<%= searchTerm %>"</p>
+        <% } %>
+        <% if (files && files.length > 0) { %>
+            <div class="notes">
+                <% files.forEach(function(file, idx) { %>
+                    <div class="note-card" data-target="summary-<%= idx %>">
+                        <div class="note-card-header">
+                            <h3><%= file.name %></h3>
+                            <button class="edit_btn">✏️</button>
+                        </div>
+                        <p class="note-summary-preview"><%= file.summary %></p>
+                        <button class="summary-btn" type="button" data-title="<%= file.name %>" data-content-id="content-<%= idx %>">Show summary</button>
+                        <div id="content-<%= idx %>" class="note-full-content" hidden><%= file.content %></div>
+                        <div class="note-footer">
+                            <small><%= file.timeAgo %></small>
+                            <form action="/delete/<%= file.id %>" method="POST" style="display: inline;">
+                                <button type="submit" class="delete-btn" onclick="return confirm('Delete this note?')">🗑️</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p class="text-zinc-600">No notes yet</p>
+        <% } %>
+    </div>
+
+    <div id="summary-modal" class="summary-modal" aria-hidden="true">
+        <div class="summary-modal-content">
+            <button type="button" class="modal-close" aria-label="Close summary">✖</button>
+            <h3 id="modal-title"></h3>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="/about">About</a>
+                <a href="https://github.com/Abhilash-18-tech" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://instagram.com" target="_blank" rel="noopener">Instagram</a>
+                <a href="https://www.linkedin.com/in/abhilash-jamalla-06ba31322/" target="_blank" rel="noopener">LinkedIn</a>
+            </div>
+            <small>Developed by abhilash</small>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('summary-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const closeBtn = modal.querySelector('.modal-close');
+
+            function openModal(title, content) {
+                modalTitle.textContent = title;
+                modalBody.textContent = content || 'Empty note.';
+                modalBody.scrollTop = 0;
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('modal-open');
+            }
+
+            function closeModal() {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.classList.remove('modal-open');
+            }
+
+            document.querySelectorAll('.summary-btn').forEach((btn) => {
+                btn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const title = this.dataset.title || 'Note';
+                    const contentId = this.dataset.contentId;
+                    const source = contentId ? document.getElementById(contentId) : null;
+                    const content = source ? source.textContent.trim() : '';
+                    openModal(title, content);
+                });
+            });
+
+            closeBtn.addEventListener('click', function (event) {
+                event.preventDefault();
+                closeModal();
+            });
+
+            modal.addEventListener('click', function (event) {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            document.addEventListener('keyup', function (event) {
+                if (event.key === 'Escape' && modal.classList.contains('open')) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
